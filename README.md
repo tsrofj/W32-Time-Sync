@@ -20,6 +20,28 @@ This folder contains a PowerShell script for comparing `w32tm /query /configurat
 - Permission to run remote commands on the target servers
 - Network access to the servers over WinRM ports 5985 or 5986
 
+### Enabling WinRM on the target server
+
+On each target server, enable PowerShell remoting so `Invoke-Command` can connect:
+
+```powershell
+Enable-PSRemoting -Force
+```
+
+If needed, also confirm that:
+
+```powershell
+Get-Service WinRM
+Get-NetFirewallRule -DisplayGroup 'Windows Remote Management' | Select-Object DisplayName, Enabled, Profile, Direction, Action
+Test-WSMan localhost
+```
+
+- `Get-Service WinRM` confirms that the WinRM service is running.
+- `Get-NetFirewallRule` checks that the Windows Remote Management firewall rules are enabled for inbound traffic.
+- `Test-WSMan localhost` confirms that the server can respond to WinRM requests locally and that remoting is available.
+
+If `Test-WSMan localhost` succeeds but remote connections still fail, verify that the account running the script has permission to connect and query the remote server.
+
 ## How to use
 
 1. Edit `servers.txt` and list one hostname or IP address per line.
