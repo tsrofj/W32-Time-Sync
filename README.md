@@ -1,17 +1,19 @@
 # W32 Time Sync Comparison
 
-This folder contains a PowerShell script for comparing `w32tm /query /configuration` output across multiple Windows servers.
+This folder contains a PowerShell script for comparing `w32tm /query /configuration` output across multiple Windows servers and recording each server's `w32tm /query /source` result.
 
 ## What it does
 
 `Compare-W32tmConfig.ps1`:
 
 - Reads target server names or IP addresses from `servers.txt`
-- Runs `w32tm /query /configuration` remotely through WinRM
-- Saves the raw output for each server in `W32TM_Results/`
+- Runs `w32tm /query /source`, then `w32tm /query /configuration`, remotely through WinRM
+- Saves the source output followed by the configuration output in the existing per-server text file in `W32TM_Results/`
 - Prints a side-by-side comparison table in the console
 - Highlights configuration settings that differ between servers
 - Exports the full comparison to `W32TM_Results/w32tm_comparison.csv`
+
+The source result is included in each host text file for reference. The comparison table and CSV contain configuration settings only.
 
 ## Requirements
 
@@ -66,8 +68,8 @@ The script uses the first 10 valid entries.
 
 Results are written to `W32TM_Results/`:
 
-- `*_w32tm.txt` files for each server
-- `w32tm_comparison.csv` for the combined comparison
+- `*_w32tm.txt` files for each server, with `/source` output followed by `/configuration` output
+- `w32tm_comparison.csv` for the configuration comparison across servers
 
 ## Notes
 

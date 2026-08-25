@@ -1,17 +1,21 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Queries w32tm /query /configuration on multiple Windows Server 2016 hosts
-    and compares the output side-by-side.
+    Queries w32tm /query /source and /configuration on multiple Windows Server
+    2016 hosts and compares the configuration output side-by-side.
 
 .DESCRIPTION
-    Runs 'w32tm /query /configuration' remotely via Invoke-Command (WinRM) on
-    each server listed in a plain-text file (one hostname or IP per line, up to
-    10 servers), parses the key=value pairs, and produces:
-      1. A per-server raw output file in the $OutputDir folder.
-      2. A console comparison table showing every setting and each server's value.
-      3. A highlighted list of settings that differ across servers.
-      4. A CSV export of the full comparison.
+    Runs 'w32tm /query /source' followed by 'w32tm /query /configuration'
+    remotely via Invoke-Command (WinRM) on each server listed in a plain-text
+    file (one hostname or IP per line, up to 10 servers), parses the
+        configuration key=value pairs, and produces:
+            1. A per-server text file containing source output followed by configuration output.
+            2. A console comparison table showing configuration settings and each server's value.
+            3. A highlighted list of configuration settings that differ across servers.
+            4. A CSV export of the configuration comparison.
+
+        The source output is retained in each per-server text file and is not included
+        in the configuration comparison table or CSV.
 
 .NOTES
     Prerequisites
@@ -89,7 +93,10 @@ foreach ($Server in $Servers) {
 
     $invokeParams = @{
         ComputerName = $Server
-        ScriptBlock  = { w32tm /query /configuration }
+        ScriptBlock  = {
+            w32tm /query /source
+            w32tm /query /configuration
+        }
         ErrorAction  = 'Stop'
     }
     if ($Credential) { $invokeParams['Credential'] = $Credential }
