@@ -1,19 +1,33 @@
 # W32 Time Sync Comparison
 
-This folder contains a PowerShell script for comparing `w32tm /query /configuration` output across multiple Windows servers and recording each server's `w32tm /query /source` result.
+This folder contains a PowerShell script for comparing `w32tm /query /configuration /verbose` output across multiple Windows servers and recording each server's `w32tm /query /source` result.
 
 ## What it does
 
 `Compare-W32tmConfig.ps1`:
 
 - Reads target server names or IP addresses from `servers.txt`
-- Runs `w32tm /query /source`, then `w32tm /query /configuration`, remotely through WinRM
+- Runs `w32tm /query /source`, then `w32tm /query /configuration /verbose`, remotely through WinRM
 - Saves the source output followed by the configuration output in the existing per-server text file in `W32TM_Results/`
 - Prints a side-by-side comparison table in the console
 - Highlights configuration settings that differ between servers
 - Exports the full comparison to `W32TM_Results/w32tm_comparison.csv`
 
 The source result is included in each host text file for reference. The comparison table and CSV contain configuration settings only. CSV setting names retain the configuration section and time-provider context, such as `TimeProviders\NtpClient\Enabled`, so duplicate fields from different sections are not overwritten.
+
+### CSV format
+
+The CSV contains one row per configuration field. The `Setting` column identifies the section and time provider, followed by one column for each server:
+
+```csv
+"Setting","server01","server02"
+"Configuration\EventLogFlags","2 (Local)","2 (Local)"
+"TimeProviders\NtpClient\Enabled","1 (Local)","1 (Local)"
+"TimeProviders\NtpClient\Type","NT5DS (Policy)","NTP (Local)"
+"TimeProviders\VMICTimeProvider\Enabled","1 (Local)","0 (Local)"
+```
+
+Setting rows retain the order in which fields first appear in the queried hosts; they are not alphabetically sorted.
 
 ## Requirements
 
@@ -68,7 +82,7 @@ The script uses the first 10 valid entries.
 
 Results are written to `W32TM_Results/`:
 
-- `*_w32tm.txt` files for each server, with `/source` output followed by `/configuration` output
+- `*_w32tm.txt` files for each server, with `/source` output followed by `/configuration /verbose` output
 - `w32tm_comparison.csv` for the configuration comparison across servers
 
 ## Notes
