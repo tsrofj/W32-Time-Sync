@@ -56,10 +56,10 @@ if (-not (Test-Path $ServersFile)) {
     exit 1
 }
 
-$Servers = Get-Content -Path $ServersFile |
+$Servers = @(Get-Content -Path $ServersFile |
     Where-Object { $_ -match '\S' -and $_ -notmatch '^\s*#' } |  # skip blank/comment lines
     ForEach-Object { $_.Trim() } |
-    Select-Object -First 10  # cap at 10 servers
+    Select-Object -First 10)  # cap at 10 servers
 
 if ($Servers.Count -eq 0) {
     Write-Error "No valid server entries found in: $ServersFile"
@@ -128,8 +128,14 @@ if ($AllResults.Count -eq 0) {
 
 # --- Build a unified key list (superset of all keys) -----------------------
 
-$AllKeys = $AllResults.Values | ForEach-Object { $_.Keys } |
-    Sort-Object -Unique
+$AllKeys = @()
+foreach ($result in $AllResults.Values) {
+    foreach ($key in $result.Keys) {
+        if ($AllKeys -notcontains $key) {
+            $AllKeys += $key
+        }
+    }
+}
 
 # --- Display comparison table ----------------------------------------------
 

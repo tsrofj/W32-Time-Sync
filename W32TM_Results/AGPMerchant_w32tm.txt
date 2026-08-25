@@ -1,0 +1,48 @@
+﻿[Configuration]
+
+EventLogFlags: 2 (Local)
+AnnounceFlags: 10 (Local)
+TimeJumpAuditOffset: 28800 (Local)
+MinPollInterval: 6 (Local)
+MaxPollInterval: 10 (Local)
+MaxNegPhaseCorrection: 4294967295 (Local)
+MaxPosPhaseCorrection: 4294967295 (Local)
+MaxAllowedPhaseOffset: 300 (Local)
+
+FrequencyCorrectRate: 4 (Local)
+PollAdjustFactor: 5 (Local)
+LargePhaseOffset: 50000000 (Local)
+SpikeWatchPeriod: 900 (Local)
+LocalClockDispersion: 10 (Local)
+HoldPeriod: 5 (Local)
+PhaseCorrectRate: 1 (Local)
+UpdateInterval: 100 (Local)
+
+
+[TimeProviders]
+
+NtpClient (Local)
+DllName: C:\Windows\system32\w32time.dll (Local)
+Enabled: 1 (Local)
+InputProvider: 1 (Local)
+CrossSiteSyncFlags: 2 (Policy)
+AllowNonstandardModeCombinations: 1 (Local)
+ResolvePeerBackoffMinutes: 15 (Policy)
+ResolvePeerBackoffMaxTimes: 7 (Policy)
+CompatibilityFlags: 2147483648 (Local)
+EventLogFlags: 0 (Policy)
+LargeSampleSkew: 3 (Local)
+SpecialPollInterval: 3600 (Policy)
+Type: NT5DS (Policy)
+
+VMICTimeProvider (Local)
+DllName: C:\Windows\System32\vmictimeprovider.dll (Local)
+Enabled: 1 (Local)
+InputProvider: 1 (Local)
+
+NtpServer (Local)
+DllName: C:\Windows\system32\w32time.dll (Local)
+Enabled: 0 (Local)
+InputProvider: 0 (Local)
+
+
