@@ -13,7 +13,7 @@ This folder contains a PowerShell script for comparing `w32tm /query /configurat
 - Highlights configuration settings that differ between servers
 - Exports the full comparison to `W32TM_Results/w32tm_comparison.csv`
 
-The source result is included in each host text file for reference. The comparison table and CSV contain configuration settings only.
+The source result is included in each host text file for reference. The comparison table and CSV contain configuration settings only. CSV setting names retain the configuration section and time-provider context, such as `TimeProviders\NtpClient\Enabled`, so duplicate fields from different sections are not overwritten.
 
 ## Requirements
 

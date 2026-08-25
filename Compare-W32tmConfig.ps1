@@ -109,13 +109,31 @@ foreach ($Server in $Servers) {
         $rawLines | Set-Content -Path $rawFile -Encoding UTF8
         Write-Host "    Saved raw output -> $rawFile" -ForegroundColor DarkGray
 
-        # Parse "Key: Value (source)" or "Key: Value" lines into a dictionary
+        # Parse configuration fields while retaining section/provider context.
         $parsed = [ordered]@{}
+        $section = ''
+        $provider = ''
         foreach ($line in $rawLines) {
-            if ($line -match '^\s*(.+?)\s*:\s*(.+?)\s*(\([^)]*\))?\s*$') {
-                $key   = $Matches[1].Trim()
+            $trimmedLine = $line.Trim()
+            if (-not $trimmedLine) { continue }
+
+            if ($trimmedLine -match '^\[(.+)\]$') {
+                $section = $Matches[1].Trim()
+                $provider = ''
+                continue
+            }
+
+            if ($trimmedLine -match '^(.+?)\s+\([^)]*\)$' -and $trimmedLine -notmatch ':') {
+                $provider = ($Matches[1]).Trim()
+                continue
+            }
+
+            if ($trimmedLine -match '^(.+?)\s*:\s*(.+?)\s*(\([^)]*\))?\s*$') {
+                $field  = $Matches[1].Trim()
                 $value = $Matches[2].Trim()
                 if ($Matches[3]) { $value += " $($Matches[3].Trim())" }
+                $keyParts = @($section, $provider, $field) | Where-Object { $_ }
+                $key = $keyParts -join '\'
                 $parsed[$key] = $value
             }
         }
