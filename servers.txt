@@ -1,0 +1,12 @@
+# List of Windows Server 2016 targets for Compare-W32tmConfig.ps1
+# One hostname or IP address per line.
+# Lines starting with '#' and blank lines are ignored.
+# Maximum of 10 servers will be used.
+
+server01
+server02
+server03
+server04
+server05
+server06
+server07
