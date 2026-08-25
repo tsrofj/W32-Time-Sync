@@ -90,6 +90,7 @@ The script uses the first 10 valid entries.
 Results are written to `W32TM_Results/`:
 
 - `*_w32tm.txt` files for each server, with `/source`, `/configuration /verbose`, and policy audit output
+- `w32tm_SxS_comparison.txt` containing the same formatted side-by-side table printed in the console
 - `w32tm_comparison.csv` for the configuration comparison across servers
 
 ## Notes

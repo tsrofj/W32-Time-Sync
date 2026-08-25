@@ -13,7 +13,7 @@
             2. A Windows Time policy audit containing policy parameters and applied GPO details.
             3. A console comparison table showing configuration settings and each server's value.
             4. A highlighted list of configuration settings that differ across servers.
-            5. A CSV export of the configuration comparison.
+            5. A plain-text and CSV export of the configuration comparison.
 
         The source output is retained in each per-server text file and is not included
         in the configuration comparison table or CSV. Section and time-provider names
@@ -208,7 +208,11 @@ $tableRows = foreach ($key in $AllKeys) {
     [PSCustomObject]$row
 }
 
-$tableRows | Format-Table -AutoSize -Wrap
+$tableText = $tableRows | Format-Table -AutoSize -Wrap | Out-String
+$tablePath = Join-Path $OutputDir 'w32tm_SxS_comparison.txt'
+$tableText | Set-Content -Path $tablePath -Encoding UTF8
+Write-Host $tableText -NoNewline
+Write-Host "Comparison table saved to: $tablePath" -ForegroundColor Cyan
 
 # --- Highlight differences -------------------------------------------------
 
