@@ -8,12 +8,19 @@ This folder contains a PowerShell script for comparing `w32tm /query /configurat
 
 - Reads target server names or IP addresses from `servers.txt`
 - Runs `w32tm /query /source`, then `w32tm /query /configuration /verbose`, remotely through WinRM
-- Saves the source output followed by the configuration output in the existing per-server text file in `W32TM_Results/`
+- Audits Windows Time policy parameters under `HKLM\SOFTWARE\Policies\Microsoft\W32Time` and records applied computer policies with `gpresult`
+- Saves the source output, configuration output, and policy audit in the existing per-server text file in `W32TM_Results/`
 - Prints a side-by-side comparison table in the console
 - Highlights configuration settings that differ between servers
 - Exports the full comparison to `W32TM_Results/w32tm_comparison.csv`
 
 The source result is included in each host text file for reference. The comparison table and CSV contain configuration settings only. CSV setting names retain the configuration section and time-provider context, such as `TimeProviders\NtpClient\Enabled`, so duplicate fields from different sections are not overwritten.
+
+### Policy control
+
+The policy audit checks the Windows Time policy registry path `HKLM\SOFTWARE\Policies\Microsoft\W32Time` on each target and records every policy parameter found there. It also includes the applied computer policy summary from `gpresult /scope computer /r`. A parameter reported as `(Policy)` by `w32tm /query /configuration /verbose` is controlled by policy; `(Local)` indicates local configuration.
+
+When the policy contains an `NtpServer` value, the audit labels it as the NTP policy server/URL. Windows does not expose a universal web URL for the originating Group Policy Object through `w32tm`; use the applied GPO names in the `gpresult` section to locate the policy in Group Policy Management.
 
 ### CSV format
 
@@ -82,7 +89,7 @@ The script uses the first 10 valid entries.
 
 Results are written to `W32TM_Results/`:
 
-- `*_w32tm.txt` files for each server, with `/source` output followed by `/configuration /verbose` output
+- `*_w32tm.txt` files for each server, with `/source`, `/configuration /verbose`, and policy audit output
 - `w32tm_comparison.csv` for the configuration comparison across servers
 
 ## Notes

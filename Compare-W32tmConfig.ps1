@@ -10,13 +10,16 @@
     file (one hostname or IP per line, up to 10 servers), parses the
         configuration field:value pairs, and produces:
             1. A per-server text file containing source output followed by configuration output.
-            2. A console comparison table showing configuration settings and each server's value.
-            3. A highlighted list of configuration settings that differ across servers.
-            4. A CSV export of the configuration comparison.
+            2. A Windows Time policy audit containing policy parameters and applied GPO details.
+            3. A console comparison table showing configuration settings and each server's value.
+            4. A highlighted list of configuration settings that differ across servers.
+            5. A CSV export of the configuration comparison.
 
         The source output is retained in each per-server text file and is not included
         in the configuration comparison table or CSV. Section and time-provider names
-        are included in CSV setting names so duplicate fields are preserved.
+        are included in CSV setting names so duplicate fields are preserved. Policy
+        parameters are recorded in the per-server text file under a separate audit
+        section and are not mixed into the configuration CSV.
 
 .NOTES
     Prerequisites
@@ -95,8 +98,32 @@ foreach ($Server in $Servers) {
     $invokeParams = @{
         ComputerName = $Server
         ScriptBlock  = {
+            Write-Output '[W32TM Source]'
             w32tm /query /source
+            Write-Output '[W32TM Configuration]'
             w32tm /query /configuration /verbose
+            Write-Output '[W32TM Policy Audit]'
+
+            $policyRoot = 'HKLM:\SOFTWARE\Policies\Microsoft\W32Time'
+            if (Test-Path -LiteralPath $policyRoot) {
+                Write-Output "Policy registry path: $policyRoot"
+                foreach ($policyKey in @((Get-Item -LiteralPath $policyRoot) + @(Get-ChildItem -LiteralPath $policyRoot -Recurse))) {
+                    $registryPath = $policyKey.Name
+                    foreach ($property in $policyKey.Property) {
+                        $value = (Get-ItemProperty -LiteralPath $policyKey.PSPath -Name $property).$property
+                        Write-Output "Policy parameter: $registryPath\$property = $value"
+                        if ($property -eq 'NtpServer') {
+                            Write-Output "NTP policy server/URL: $value"
+                        }
+                    }
+                }
+            } else {
+                Write-Output 'Windows Time policy registry path not present.'
+            }
+
+            Write-Output ''
+            Write-Output 'Applied computer policies (gpresult /r):'
+            gpresult /scope computer /r 2>&1
         }
         ErrorAction  = 'Stop'
     }
@@ -114,6 +141,7 @@ foreach ($Server in $Servers) {
         $parsed = [ordered]@{}
         $section = ''
         $provider = ''
+        $parseConfiguration = $false
         foreach ($line in $rawLines) {
             $trimmedLine = $line.Trim()
             if (-not $trimmedLine) { continue }
@@ -121,8 +149,12 @@ foreach ($Server in $Servers) {
             if ($trimmedLine -match '^\[(.+)\]$') {
                 $section = $Matches[1].Trim()
                 $provider = ''
+                if ($section -eq 'Configuration') { $parseConfiguration = $true }
+                if ($section -eq 'W32TM Policy Audit') { $parseConfiguration = $false }
                 continue
             }
+
+            if (-not $parseConfiguration) { continue }
 
             if ($trimmedLine -match '^(.+?)\s+\([^)]*\)$' -and $trimmedLine -notmatch ':') {
                 $provider = ($Matches[1]).Trim()
