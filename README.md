@@ -22,6 +22,19 @@ The policy audit checks the Windows Time policy registry path `HKLM\SOFTWARE\Pol
 
 When the policy contains an `NtpServer` value, the audit labels it as the NTP policy server/URL. Windows does not expose a universal web URL for the originating Group Policy Object through `w32tm`; use the applied GPO names in the `gpresult` section to locate the policy in Group Policy Management.
 
+### Common `w32tm` type values
+
+The `TimeProviders\NtpClient\Type` value identifies the synchronization method:
+
+| Type | Meaning |
+| --- | --- |
+| `NTP` | Synchronize directly with the configured NTP servers. |
+| `NT5DS` | Synchronize through the Active Directory domain hierarchy. Domain members normally use a domain controller, ultimately tracing to the forest-root PDC emulator. |
+| `AllSync` | Use all available synchronization mechanisms. |
+| `NoSync` | Do not synchronize the system clock. |
+
+`NT5DS` is the standard Windows value for domain-hierarchy synchronization. `NT6DS` is not a standard `w32tm` type; check the raw host output if it appears.
+
 ### CSV format
 
 The CSV contains one row per configuration field. The `Setting` column identifies the section and time provider, followed by one column for each server:
