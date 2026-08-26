@@ -10,7 +10,7 @@ This folder contains a PowerShell script for comparing `w32tm /query /configurat
 - Runs `w32tm /query /source`, then `w32tm /query /configuration /verbose`, remotely through WinRM
 - Audits Windows Time policy parameters under `HKLM\SOFTWARE\Policies\Microsoft\W32Time` and records applied computer policies with `gpresult`
 - Saves the source output, configuration output, and policy audit in the existing per-server text file in `W32TM_Results/`
-- Prints a side-by-side comparison table in the console
+- Displays the side-by-side comparison table in the console and writes it to `W32TM_Results/w32tm_SxS_comparison.txt`
 - Highlights configuration settings that differ between servers
 - Exports the full comparison to `W32TM_Results/w32tm_comparison.csv`
 
